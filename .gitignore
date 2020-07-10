@@ -39,6 +39,8 @@ src/docker_machine/src/docker_machine/vendor/
 
 src/sunstone/public/.sass-cache
 src/sunstone/public/node_modules
+src/sunstone/guac/node_modules
+src/sunstone/guac/dist
 src/sunstone/public/bower_components
 src/sunstone/public/css/app.css
 src/sunstone/public/css/app.min.css

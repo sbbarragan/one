@@ -227,8 +227,13 @@ define(function(require) {
             var wFile = OpenNebulaVM.isWFileSupported(data.VM);
             actions += wFile ? OpenNebulaVM.buttonWFile(id, wFile) : "";
 
-            var rdp = OpenNebulaVM.isRDPSupported(data.VM);
-            actions += rdp ? OpenNebulaVM.buttonRDP(rdp.IP, data.VM) : "";
+            var rdp = OpenNebulaVM.isConnectionSupported(data.VM, 'rdp');
+            //actions += rdp ? OpenNebulaVM.buttonSaveRDP(rdp.IP, data.VM) : "";
+            //actions += rdp ? OpenNebulaVM.buttonRDP(id) : "";
+            actions += rdp ? OpenNebulaVM.dropdownRDP(id, rdp.ID, data.VM) : "";
+
+            var ssh = OpenNebulaVM.isConnectionSupported(data.VM, 'ssh');
+            actions += ssh ? OpenNebulaVM.buttonSSH(id) : "";
           }
 
           roleVms[index] = rowInfoRoleVm(id, name, uname, gname, ips, actions);
@@ -329,8 +334,8 @@ define(function(require) {
       return false;
     });
 
-    $(".w_file", context).off("click");
-    $(".w_file", context).on("click", function() {
+    $(".w-file", context).off("click");
+    $(".w-file", context).on("click", function() {
       var data = $(this).data();
 
       (data.hasOwnProperty("id") && data.hasOwnProperty("hostname") && data.hasOwnProperty("type") && data.hasOwnProperty("port"))
@@ -348,18 +353,37 @@ define(function(require) {
     $(".vnc", context).on("click", function() {
       var data = $(this).data();
 
-      if (!Vnc.lockStatus() && data.hasOwnProperty("id")) {
-        Vnc.lock();
-        Sunstone.runAction("VM.startvnc_action", String(data.id));
-      } else {
-        Notifier.notifyError(Locale.tr("VNC Connection in progress"));
-      }
+      (data.hasOwnProperty("id"))
+        ? Sunstone.runAction("VM.startguac_action", String(data.id), 'vnc')
+        : Notifier.notifyError(Locale.tr("VNC - Invalid action"));
 
       return false;
     });
 
     $(".rdp", context).off("click");
     $(".rdp", context).on("click", function() {
+      var data = $(this).data();
+
+      (data.hasOwnProperty("id"))
+        ? Sunstone.runAction("VM.startguac_action", String(data.id), 'rdp')
+        : Notifier.notifyError(Locale.tr("RDP - Invalid action"));
+
+      return false;
+    });
+
+    $(".ssh", context).off("click");
+    $(".ssh", context).on("click", function() {
+      var data = $(this).data();
+
+      (data.hasOwnProperty("id"))
+        ? Sunstone.runAction("VM.startguac_action", String(data.id), 'ssh')
+        : Notifier.notifyError(Locale.tr("SSH - Invalid action"));
+
+      return false;
+    });
+
+    $(".save-rdp", context).off("click");
+    $(".save-rdp", context).on("click", function() {
       var data = $(this).data();
 
       (data.hasOwnProperty("ip") && data.hasOwnProperty("name"))

@@ -24,7 +24,7 @@ if [ -z "$ONE_LOCATION" ]; then
     SUNSTONE_LOG=/var/log/one/sunstone.log
     SUNSTONE_LOG_ERROR=/var/log/one/sunstone.error
     SUNSTONE_CONF=/etc/one/sunstone-server.conf
-    NOVNC_SERVER=/usr/bin/novnc-server
+    GUACAMOLE_SERVER=/usr/bin/guac-server
 else
     SUNSTONE_PID=$ONE_LOCATION/var/sunstone.pid
     SUNSTONE_SERVER=$ONE_LOCATION/lib/sunstone/sunstone-server.rb
@@ -32,7 +32,7 @@ else
     SUNSTONE_LOG=$ONE_LOCATION/var/sunstone.log
     SUNSTONE_LOG_ERROR=$ONE_LOCATION/var/sunstone.error
     SUNSTONE_CONF=$ONE_LOCATION/etc/sunstone-server.conf
-    NOVNC_SERVER=$ONE_LOCATION/bin/novnc-server
+    GUACAMOLE_SERVER=$ONE_LOCATION/bin/guac-server
 fi
 
 setup()
@@ -62,8 +62,8 @@ setup()
 
 start()
 {
-  if [ "$1" = "-n" ]; then
-    novnc=1
+  if [ "$1" = "-g" ]; then
+    guacamole=1
   fi
 
   if [ ! -f "$SUNSTONE_SERVER" ]; then
@@ -71,12 +71,12 @@ start()
     exit 1
   fi
 
-  if [ "$novnc" = "1" ]; then
-    # Start novnc server
-    $NOVNC_SERVER start
+  if [ "$guacamole" = "1" ]; then
+    # Start guacamole server
+    $GUACAMOLE_SERVER start
 
     if [ "$?" != "0" ]; then
-      echo "Could not start novnc server" 1>&2
+      echo "Could not start Guacamole server" 1>&2
     fi
   fi
 
@@ -86,7 +86,7 @@ start()
   if [ "$?" != "0" ]; then
     echo "Error creating lock file" 1>&2
 
-    $NOVNC_SERVER stop
+    $GUACAMOLE_SERVER stop
     exit 1
   fi
 
@@ -96,7 +96,7 @@ start()
   if [ $? -ne 0 ]; then
     echo "Error executing sunstone-server."
     echo "Check $SUNSTONE_LOG_ERROR and $SUNSTONE_LOG for more information"
-    [ "$novnc" = "1" ] && $NOVNC_SERVER stop
+    [ "$guacamole" = "1" ] && $GUACAMOLE_SERVER stop
     exit 1
   else
     echo $LASTPID > $SUNSTONE_PID
@@ -108,7 +108,7 @@ start()
   if [ $? -ne 0 ]; then
     echo "Error executing sunstone-server."
     echo "Check $SUNSTONE_LOG_ERROR and $SUNSTONE_LOG for more information"
-    [ "$novnc" = "1" ] && $NOVNC_SERVER stop
+    [ "$guacamole" = "1" ] && $GUACAMOLE_SERVER stop
     exit 1
   fi
 
@@ -120,12 +120,12 @@ start()
 #
 stop()
 {
-  if [ "$1" = "-n" ]; then
-    novnc=1
+  if [ "$1" = "-g" ]; then
+    guacamole=1
   fi
 
-  # Stop novnc server
-  [ "$novnc" = "1" ] && $NOVNC_SERVER stop
+  # Stop guacamole server
+  [ "$guacamole" = "1" ] && $GUACAMOLE_SERVER stop
 
   if [ ! -f $SUNSTONE_PID ]; then
     echo "Couldn't find sunstone-server process pid." >&2
@@ -146,16 +146,16 @@ stop()
 case "$1" in
   start)
     setup
-    start -n
+    start -g
     ;;
   stop)
-    stop -n
+    stop -g
     exit $?
     ;;
   restart)
-    stop -n 2> /dev/null
+    stop -g 2> /dev/null
     setup
-    start -n
+    start -g
     ;;
   start-sunstone)
     setup
@@ -165,7 +165,7 @@ case "$1" in
     stop
     ;;
   restart-sunstone)
-    stop -n 2> /dev/null
+    stop -g 2> /dev/null
     setup
     start
     ;;

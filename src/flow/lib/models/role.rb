@@ -18,11 +18,12 @@ require 'treetop'
 require 'treetop/version'
 require 'grammar'
 require 'parse-cron'
-
+=begin
 if Gem::Version.create('1.6.3') >= Gem.loaded_specs['treetop'].version
     raise 'treetop gem version must be >= 1.6.3.' \
           "Current version is #{Treetop::VERSION::STRING}"
 end
+=end
 
 module OpenNebula
 

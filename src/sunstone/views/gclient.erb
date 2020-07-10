@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= params['vm_name']%></title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" type="text/css" href="css/novnc-custom.css" title="plain">
+    <script type="text/javascript">
+      var csrftoken = '<%= session[:csrftoken] %>';
+    </script>
+  </head>
+  <body style="overflow:hidden;">
+    <div class="site-wrap" tabindex="0" style="outline:none;">
+      <div id="display" style="width:100%;height:100vh;overflow:hidden;position:absolute;left:0;top:0;"></div>
+    </div>
+
+    <!-- Storage for encoded connection string -->
+    <input type="hidden" id="connectionstring" value="<%= token %>" />
+
+  </body>
+</html>

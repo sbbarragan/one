@@ -123,6 +123,7 @@ require "sunstone_2f_auth"
 require 'CloudAuth'
 require 'SunstoneServer'
 require 'SunstoneViews'
+require 'pry-byebug'
 
 begin
     require "SunstoneWebAuthn"
@@ -252,12 +253,15 @@ if $conf[:webauthn_avail]
 end
 
 #start VNC proxy
-
 $vnc = OpenNebulaVNC.new($conf, logger)
+
+#init Guacamole server
+$guac = OpenNebulaGuac.new($conf, logger)
 
 configure do
     set :run, false
     set :vnc, $vnc
+    set :guac, $guac
     set :erb, :trim => '-'
 end
 
@@ -506,8 +510,7 @@ before do
     content_type 'application/json', :charset => 'utf-8'
     @request_body = request.body.read
     request.body.rewind
-
-    unless %w(/ /login /vnc /spice /version /webauthn_options_for_get).include?(request.path)
+    unless %w(/ /login /vnc /spice /gclient /version /webauthn_options_for_get).include?(request.path)
         halt [401, "csrftoken"] unless authorized? && valid_csrftoken?
     end
 
@@ -693,6 +696,27 @@ get '/spice' do
         erb :spice
     end
 end
+
+get '/gclient' do
+    content_type 'text/html', :charset => 'utf-8'
+    if !authorized?
+        erb :login
+    else
+        token = @SunstoneServer.startguac(vm_id, $guac)
+        erb :gclient, :locals => { :token => token }
+    end
+end
+
+##############################################################################
+# Start Guacamole Session for a target VM
+##############################################################################
+post '/vm/:id/guac/:type' do
+    vm_id = params[:id]
+    type_connection = params[:type]
+
+    @SunstoneServer.startguac(vm_id, type_connection, $guac)
+end
+
 
 get '/version' do
     version = {}

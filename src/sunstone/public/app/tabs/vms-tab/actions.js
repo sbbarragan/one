@@ -23,6 +23,7 @@ define(function(require) {
   var CommonActions = require('utils/common-actions');
   var Vnc = require('utils/vnc');
   var Spice = require('utils/spice');
+  var GClient = require('utils/gclient');
   var Files = require('utils/files');
 
   var TAB_ID = require('./tabId');
@@ -31,6 +32,7 @@ define(function(require) {
   var MIGRATE_DIALOG_ID          = require('./dialogs/migrate/dialogId');
   var VNC_DIALOG_ID              = require('./dialogs/vnc/dialogId');
   var SPICE_DIALOG_ID            = require('./dialogs/spice/dialogId');
+  var GUAC_DIALOG_ID            = require('./dialogs/guac/dialogId');
   var SAVE_AS_TEMPLATE_DIALOG_ID = require('./dialogs/saveas-template/dialogId');
   var UPDATECONF_FORM_ID         = require('./form-panels/updateconf/formPanelId');
 
@@ -279,6 +281,52 @@ define(function(require) {
       error: function(req, resp) {
         Notifier.onError(req, resp);
         Vnc.unlock();
+      },
+      notify: true
+    },
+    "VM.guac_vnc" : {
+      type: "custom",
+      call: function() {
+        $.each(Sunstone.getDataTable(TAB_ID).elements(), function(index, elem) {
+          Sunstone.runAction("VM.startguac_action", elem, 'vnc');
+        });
+      },
+      error: function(req, resp) {
+        Notifier.onError(req, resp);
+      },
+    },
+    "VM.guac_rdp" : {
+      type: "custom",
+      call: function() {
+        $.each(Sunstone.getDataTable(TAB_ID).elements(), function(index, elem) {
+          Sunstone.runAction("VM.startguac_action", elem, 'rdp');
+        });
+      },
+      error: function(req, resp) {
+        Notifier.onError(req, resp);
+      },
+    },
+    "VM.guac_ssh" : {
+      type: "custom",
+      call: function() {
+        $.each(Sunstone.getDataTable(TAB_ID).elements(), function(index, elem) {
+          Sunstone.runAction("VM.startguac_action", elem, 'ssh');
+        });
+      },
+      error: function(req, resp) {
+        Notifier.onError(req, resp);
+      },
+    },
+    "VM.startguac_action" : {
+      type: "single",
+      call: OpenNebulaVM.guac,
+      callback: function(request, response) {
+       var dialog = Sunstone.getDialog(GUAC_DIALOG_ID);
+       dialog.setElement(response);
+       dialog.show();
+      },
+      error: function(req, resp) {
+        Notifier.onError(req, resp);
       },
       notify: true
     },
